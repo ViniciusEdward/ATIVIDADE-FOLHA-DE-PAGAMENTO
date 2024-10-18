@@ -48,8 +48,20 @@ def adicionar_folha_de_pagamento():
     inserir_dependentes = input("Digite quantos dependentes você tem: ")
     session.add(FOLHA_DE_PAGAMENTO)
     session.commit()
-
-
+    
+def inss():
+    if faixa_salarial <= 1100:
+        calculo = faixa_salarial * 0.075
+        print(f"Desconto: {calculo:.2f}")
+    elif faixa_salarial > 1100 or faixa_salarial < 2203:
+        calculo = (faixa_salarial * 0.9) /100
+        print(f"Desconto: {calculo:.2f}")
+    elif faixa_salarial > 2203 or faixa_salarial < 3305:
+        calculo = (faixa_salarial * 0.12) /100
+        print(f"Desconto: {calculo:.2f}")
+    elif faixa_salarial > 3305 or faixa_salarial < 6433:
+        calculo = (faixa_salarial * 0.14) /100
+        print(f"Desconto: {calculo:.2f}")
 
         
 
