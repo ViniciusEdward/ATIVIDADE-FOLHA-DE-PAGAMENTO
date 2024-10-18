@@ -8,7 +8,7 @@ INSS (Instituto Nacional do Seguro Social)
 O desconto do INSS é calculado de acordo com a faixa salarial do funcionário:
 
 Salário até R$ 1.100,00: 7,5%
-Salário de R$ 1.100,01 até R$ 2.203,48: 9%
+Salário de R$ 1.100,01 até R$ 2.203,48: 9% p
 Salário de R$ 2.203,49 até R$ 3.305,22: 12%
 Salário de R$ 3.305,23 até R$ 6.433,57: 14%
 O valor máximo de desconto do INSS é de R$ 854,36.
@@ -37,6 +37,7 @@ Pergunte se o funcionário deseja receber vale transporte (s/n).
 Pergunte o valor do vale refeição fornecido pela empresa.
 Calcule os descontos e acréscimos na folha de pagamento do funcionário.
 Mostre o salário líquido do funcionário após os descontos e acréscimos.
+
 Observações
 Considere que o funcionário possui apenas um dependente.
 Considere que o salário base é o salário antes de quaisquer descontos ou acréscimos.
