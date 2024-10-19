@@ -9,7 +9,6 @@ FOLHA_DE_PAGAMENTO = create_engine("sqlite:///folha de pagamento.db")
 Session = sessionmaker(bind=FOLHA_DE_PAGAMENTO)
 session = Session()
 
-
 # Criando tabela.
 Base = declarative_base()
 
@@ -21,17 +20,13 @@ class Funcionario(Base):
     email = Column("Email", String)
     senha = Column("Senha", String)
     salario = Column("Salário", FLOAT)
-    vale_transporte = Column("Vale transporte", FLOAT)
-    vale_refeicao = Column("Vale refeição", FLOAT)
     dependentes = Column("Dependentes", Integer)
 
     # Definindo atributos da classe.
-    def __init__(self, email: str, salario:float, senha:str, vale_transporte:float, vale_refeicao: float, dependentes: int):
+    def __init__(self, email: str, salario: float, senha: str, dependentes: int):
         self.email = email
         self.senha = senha
         self.salario = salario
-        self.vale_transporte = vale_transporte
-        self.vale_refeicao = vale_refeicao
         self.dependentes = dependentes
 
 # Criando tabela no banco de dados.
@@ -39,21 +34,18 @@ Base.metadata.create_all(bind=FOLHA_DE_PAGAMENTO)
 
 # Salvar no banco de dados.
 os.system("cls || clear")
-def exibindo_funcionario(funcionario):
-    print(f"{funcionario.id} - Email: {funcionario.email} - Senha: {funcionario.senha} - Salário: {funcionario.salario} - Vale transporte: {funcionario.vale_transporte} - Vale refeição: {funcionario.vale_refeicao} - Dependentes: {funcionario.dependentes}")
 
 def adicionar_folha_de_pagamento():
     funcionario = Funcionario(
-        email=input("Digite sua matrícula: "),
+        email=input("Digite seu email: "),
         senha=input("Digite sua senha: "),
         salario=float(input("Digite quanto você recebe de salário: ")),
-        vale_transporte=float(input("Digite quanto ganha de vale transporte: ")),
-        vale_refeicao=float(input("Digite quanto ganha de vale refeição: ")),
         dependentes=int(input("Digite quantos dependentes você tem: "))
     )
     session.add(funcionario)
     session.commit()
-    
+    return funcionario
+
 def inss(salario):
     if salario <= 1100:
         return salario * 0.075
@@ -83,45 +75,35 @@ def irrf(salario, dependente):
         return (salario * 0.275) - calculo_dependentes
 
 def vale_refeicao(salario):
-    calculo_refeicao = salario * 0.2
-    return calculo_refeicao
+    return salario * 0.2
 
 def vale_transporte(salario):
-    calculo_transporte = salario * 0.06
-    return calculo_transporte
+    return salario * 0.06
 
-def plano_de_saude(depedente):
-    calculo_dependente = 150 * depedente
-    return calculo_dependente
+def plano_de_saude(dependente):
+    return 150 * dependente
 
-def calcular_salario_liquido(salario, descontos, beneficios):
-    calculo_salario = salario - descontos + beneficios
-    return calculo_salario
+def calcular_salario_liquido(salario, descontos, plano_saude_valor):
+    return salario - descontos - plano_saude_valor
 
-inss_valor = inss()
-irrf_valor = irrf()
-vale_refeicao_valor = vale_refeicao()
-vale_transporte_valor = vale_transporte()
-plano_saude_valor = plano_de_saude()
+funcionario = adicionar_folha_de_pagamento()
+
+inss_valor = inss(funcionario.salario)
+irrf_valor = irrf(funcionario.salario, funcionario.dependentes)
+vale_refeicao_valor = vale_refeicao(funcionario.salario)
+vale_transporte_valor = vale_transporte(funcionario.salario)
+plano_saude_valor = plano_de_saude(funcionario.dependentes)
 
 # Calcular o salário líquido
 descontos = inss_valor + irrf_valor
 beneficios = vale_refeicao_valor + vale_transporte_valor
-salario_liquido = calcular_salario_liquido
+salario_liquido = calcular_salario_liquido(funcionario.salario, descontos, plano_saude_valor)
 
 # Exibir resultados
-#print(f"Salário Bruto: R$ {:.2f}")
+print(f"\nSalário Bruto: R$ {funcionario.salario:.2f}")
 print(f"INSS: R$ {inss_valor:.2f}")
 print(f"IRRF: R$ {irrf_valor:.2f}")
 print(f"Vale Refeição: R$ {vale_refeicao_valor:.2f}")
 print(f"Vale Transporte: R$ {vale_transporte_valor:.2f}")
 print(f"Plano de Saúde: R$ {plano_saude_valor:.2f}")
 print(f"Salário Líquido: R$ {salario_liquido:.2f}")
-
-        
-        
-    
-        
-
-    
-
