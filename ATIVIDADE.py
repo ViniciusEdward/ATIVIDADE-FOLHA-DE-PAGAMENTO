@@ -1,3 +1,8 @@
+"""
+TURMA G93313
+ALUNOS: AMANDA ALMEIDA | VINICIUS EDWARD
+"""
+
 import os
 from sqlalchemy import create_engine, Column, String, Integer, FLOAT
 from sqlalchemy.orm import sessionmaker, declarative_base
