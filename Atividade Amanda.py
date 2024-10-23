@@ -72,7 +72,6 @@ def adicionar_funcionario(matricula, senha, salario):
 
 # Função principal
 def main():
-    try:
         if session.query(Funcionario).count() == 0:
             matricula = input("Digite a matrícula: ").strip()
             senha = input("Digite a senha: ").strip()
@@ -82,10 +81,6 @@ def main():
         # Solicitar matrícula e senha
         matricula = input("Digite sua matrícula: ").strip()
         senha = input("Digite sua senha: ").strip()
-
-        if not matricula or not senha:
-            print("Matrícula e senha não podem estar vazias.")
-            return
 
         funcionario = session.query(Funcionario).filter_by(matricula=matricula, senha=senha).first()
 
@@ -99,9 +94,6 @@ def main():
             print(f"Salário Líquido: R$ {salario_liquido:.2f}")
         else:
             print("Matrícula ou senha inválidos. Verifique os dados e tente novamente.")
-    
-    except Exception as e:
-        print(f"Ocorreu um erro: {e}")
 
 main()
 
