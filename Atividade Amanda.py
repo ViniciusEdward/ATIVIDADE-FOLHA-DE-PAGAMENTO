@@ -1,25 +1,37 @@
 import os
-import sqlite3
-from sqlalchemy import create_engine, Column, String, Integer
+from sqlalchemy import create_engine, Column, String, Float, Integer
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 os.system("cls || clear")
 
-#Calcular INSS
+DADOS = create_engine('sqlite:///funcionarios.db')
+Session = sessionmaker(bind=DADOS)
+Base = declarative_base()
+
+# Definindo a tabela de funcionários
+class Funcionario(Base):
+    __tablename__ = 'funcionarios'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    matricula = Column(String)
+    senha = Column(String)
+    salario = Column(Float)
+
+Base.metadata.create_all(bind=DADOS)
+
+# Calcular INSS
 def calcular_inss(salario):
     if salario <= 1100.00:
-        desconto = salario * 0.075
+        return salario * 0.075
     elif salario <= 2203.48:
-        desconto = salario * 0.09
+        return salario * 0.09
     elif salario <= 3305.22:
-        desconto = salario * 0.12
+        return salario * 0.12
     elif salario <= 6433.57:
-        desconto = salario * 0.14
+        return salario * 0.14
     else:
-        desconto = 854.36
-    return desconto
+        return 854.36
 
-#Calcular IRRF
+# Calcular IRRF
 def calcular_irrf(salario, dependentes):
     if salario <= 2259.20:
         return 0
@@ -32,7 +44,7 @@ def calcular_irrf(salario, dependentes):
     else:
         return salario * 0.275 - (189.59 * dependentes)
 
-#Calcular os descontos e o salário líquido
+# Calcular salário líquido
 def calcular_salario_liquido(salario, vale_transporte, vale_refeicao, dependentes):
     inss = calcular_inss(salario)
     irrf = calcular_irrf(salario, dependentes)
@@ -40,41 +52,58 @@ def calcular_salario_liquido(salario, vale_transporte, vale_refeicao, dependente
     desconto_vale_refeicao = 0.20 * vale_refeicao
 
     total_descontos = inss + irrf + desconto_vale_transporte + desconto_vale_refeicao
-    salario_liquido = salario - total_descontos
+    return salario - total_descontos
+
+# Configuração do banco de dados
+engine = create_engine('sqlite:///funcionarios.db')  # Removido echo=True
+Base.metadata.create_all(engine)
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# Adicionar funcionário para testes
+def adicionar_funcionario(matricula, senha, salario):
+    if session.query(Funcionario).filter_by(matricula=matricula).first() is None:
+        novo_funcionario = Funcionario(matricula=matricula, senha=senha, salario=salario)
+        session.add(novo_funcionario)
+        session.commit()
+        print(f"Funcionário {matricula} adicionado com sucesso.")
+    else:
+        print(f"Funcionário {matricula} já existe.")
+
+# Função principal
+def main():
+    try:
+        if session.query(Funcionario).count() == 0:
+            matricula = input("Digite a matrícula: ").strip()
+            senha = input("Digite a senha: ").strip()
+            salario = float(input("Digite o salário: R$ "))
+            adicionar_funcionario(matricula, senha, salario)
+
+        # Solicitar matrícula e senha
+        matricula = input("Digite sua matrícula: ").strip()
+        senha = input("Digite sua senha: ").strip()
+
+        if not matricula or not senha:
+            print("Matrícula e senha não podem estar vazias.")
+            return
+
+        funcionario = session.query(Funcionario).filter_by(matricula=matricula, senha=senha).first()
+
+        if funcionario:
+            salario = funcionario.salario
+            dependentes = 1  # Considerando 1 dependente
+            vale_transporte = input("Deseja receber vale transporte (s/n)? ")
+            vale_refeicao = float(input("Digite o valor do vale refeição: R$ "))
+
+            salario_liquido = calcular_salario_liquido(salario, vale_transporte, vale_refeicao, dependentes)
+            print(f"Salário Líquido: R$ {salario_liquido:.2f}")
+        else:
+            print("Matrícula ou senha inválidos. Verifique os dados e tente novamente.")
     
-    return salario_liquido
+    except Exception as e:
+        print(f"Ocorreu um erro: {e}")
 
-#Conexão com o banco
-conn = sqlite3.connect('funcionarios.db')
-cursor = conn.cursor()
+main()
 
-# Criar tabela de funcionários
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS funcionarios (
-    matricula TEXT PRIMARY KEY,
-    senha TEXT,
-    salario REAL
-)
-''')
-
-#Matrícula e senha
-matricula = input("Digite sua matrícula: ")
-senha = input("Digite sua senha: ")
-
-#Consultar funcionário
-cursor.execute("SELECT salario FROM funcionarios WHERE matricula = ? AND senha = ?", (matricula, senha))
-resultado = cursor.fetchone()
-
-if resultado:
-    salario = resultado[0]
-    dependentes = 1  # Considerando 1 dependente
-    vale_transporte = input("Deseja receber vale transporte (s/n)? ")
-    vale_refeicao = float(input("Digite o valor do vale refeição: R$ "))
-
-    salario_liquido = calcular_salario_liquido(salario, vale_transporte, vale_refeicao, dependentes)
-    print(f"Salário Líquido: R$ {salario_liquido:.2f}")
-else:
-    print("Matrícula ou senha inválidos.")
-
-#Fechar a conexão
-conn.close()
+# Fechar a sessão
+session.close()
